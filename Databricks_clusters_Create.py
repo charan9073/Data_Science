@@ -194,7 +194,7 @@ Note: You'll need to replace <databricks-instance> in the api_endpoint variable 
 
 from databricks_api import DatabricksAPI
 
-def create_databricks_cluster(cluster_name, spark_version, node_type_id, spark_env_vars):
+def create_databricks_cluster(num_workers = num_workers,autoscale=None, cluster_name, spark_version, node_type_id, spark_env_vars):
     db = DatabricksAPI(
         host="example.cloud.databricks.com",
         token="your-api-token"
@@ -202,6 +202,8 @@ def create_databricks_cluster(cluster_name, spark_version, node_type_id, spark_e
 
     try:
         cluster = db.cluster.create_cluster(
+            num_workers=num_workers
+            autoscale=None
             cluster_name=cluster_name,
             spark_version=spark_version,
             node_type_id=node_type_id,
@@ -219,3 +221,12 @@ node_type_id = input('Enter the node type ID: ')
 spark_env_vars = input('Enter the Spark environment variables: ')
 
 create_databricks_cluster(cluster_name, spark_version, node_type_id, spark_env_vars)
+
+
+db.cluster.resize_cluster(
+    cluster_id,
+    num_workers=None,
+    autoscale=None,
+    headers=None,
+)
+
