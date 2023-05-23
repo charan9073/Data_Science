@@ -191,3 +191,31 @@ create_databricks_cluster_policy(api_token, policy_name, config_file_path)
 Make sure to replace "your-api-token" with your actual Databricks API token, "my-cluster-policy" with the desired name for the cluster policy, and "cluster_policy_config.json" with the path to your JSON configuration file.
 
 Note: You'll need to replace <databricks-instance> in the api_endpoint variable with the URL of your Databricks instance.
+
+from databricks_api import DatabricksAPI
+
+def create_databricks_cluster(cluster_name, spark_version, node_type_id, spark_env_vars):
+    db = DatabricksAPI(
+        host="example.cloud.databricks.com",
+        token="your-api-token"
+    )
+
+    try:
+        cluster = db.cluster.create_cluster(
+            cluster_name=cluster_name,
+            spark_version=spark_version,
+            node_type_id=node_type_id,
+            spark_env_vars=spark_env_vars
+        )
+        return cluster
+    except Exception as e:
+        print('Error creating Databricks cluster:', str(e))
+        return None
+
+# Example usage
+cluster_name = input('Enter the cluster name: ')
+spark_version = input('Enter the Spark version: ')
+node_type_id = input('Enter the node type ID: ')
+spark_env_vars = input('Enter the Spark environment variables: ')
+
+create_databricks_cluster(cluster_name, spark_version, node_type_id, spark_env_vars)
