@@ -409,3 +409,58 @@ Make sure to replace <databricks-instance> with the URL of your Databricks insta
 
 The function uses the databricks-api package to connect to the Databricks API. It first retrieves the current cluster using the provided cluster_id and stores the result in a before_df DataFrame. Then, it calls the resize_cluster method to update the cluster with the provided num_workers. Finally, it retrieves the updated cluster and creates an after_df DataFrame to store the updated cluster information. Both before_df and after_df are concatenated into a single DataFrame, result_df, which is returned as the output.
 
+-----------------------------------
+
+Can you please give me the top 10 cluster usage details, basically who are the top 10 cluster usage in the Databricks ? 
+
+To retrieve the top 10 cluster usage details, you can use the databricks-api package to interact with the Databricks API. Here's an example Python code snippet that demonstrates how to achieve this:
+
+import pandas as pd
+from databricks_api import DatabricksAPI
+
+def get_top_10_cluster_usage():
+    """
+    Retrieves the top 10 cluster usage details from Databricks.
+
+    Returns:
+        pandas.DataFrame: DataFrame containing the top 10 cluster usage details.
+    """
+    api = DatabricksAPI(host='<databricks-instance>', token='<your-access-token>')
+
+    # Get the cluster usage details
+    cluster_usage = api.cluster.list_clusters()['clusters']
+
+    # Sort the clusters by their total_runtime duration in descending order
+    sorted_clusters = sorted(cluster_usage, key=lambda x: x['total_runtime'], reverse=True)
+
+    # Get the top 10 clusters
+    top_10_clusters = sorted_clusters[:10]
+
+    # Prepare the cluster usage data for DataFrame
+    cluster_data = []
+    for cluster in top_10_clusters:
+        cluster_data.append({
+            'Cluster ID': cluster['cluster_id'],
+            'Cluster Name': cluster['cluster_name'],
+            'Total Runtime (Seconds)': cluster['total_runtime'],
+            'Num Workers': cluster['num_workers']
+        })
+
+    # Create the DataFrame
+    df_cluster_usage = pd.DataFrame(cluster_data)
+
+    return df_cluster_usage
+
+
+# Example usage
+df_top_clusters = get_top_10_cluster_usage()
+print(df_top_clusters)
+
+
+Make sure to replace <databricks-instance> with the URL of your Databricks instance and <your-access-token> with your personal access token or a valid authentication method for accessing the Databricks API.
+
+The function retrieves the cluster usage details using the list_clusters method from the databricks-api package. 
+It then sorts the clusters based on their total_runtime duration in descending order and selects the top 10 clusters.
+The relevant details such as Cluster ID, Cluster Name, Total Runtime (Seconds), and Num Workers are extracted for each cluster 
+and stored in a DataFrame. The resulting DataFrame, df_cluster_usage, contains the top 10 cluster usage details and 
+is returned as the output.
