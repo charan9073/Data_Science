@@ -464,3 +464,99 @@ It then sorts the clusters based on their total_runtime duration in descending o
 The relevant details such as Cluster ID, Cluster Name, Total Runtime (Seconds), and Num Workers are extracted for each cluster 
 and stored in a DataFrame. The resulting DataFrame, df_cluster_usage, contains the top 10 cluster usage details and 
 is returned as the output.
+
+can you please create a python function which calls databricks_api from pypi which will get list of cluster r
+Steps to followed here
+    1) Get the cluster lists from db.cluster.list_clusters(headers=None)
+	2) Then create a dataframe with this columns cluster_id,cluster_name,num_workers,node_type_id,state,
+
+Certainly! Here's a Python function that calls the databricks_api from PyPI and retrieves a list of clusters. It then creates a dataframe with the specified columns:
+
+import databricks_api
+import pandas as pd
+
+def get_cluster_list():
+    # Create an instance of the Databricks API client
+    api = databricks_api.DatabricksAPI()
+
+    # Get the cluster list using the list_clusters method
+    clusters = api.cluster.list_clusters(headers=None)
+
+    # Create a dictionary to store the cluster information
+    cluster_data = {
+        'cluster_id': [],
+        'cluster_name': [],
+        'num_workers': [],
+        'node_type_id': [],
+        'state': []
+    }
+
+    # Iterate over the clusters and extract the required information
+    for cluster in clusters['clusters']:
+        cluster_data['cluster_id'].append(cluster['cluster_id'])
+        cluster_data['cluster_name'].append(cluster['cluster_name'])
+        cluster_data['num_workers'].append(cluster['num_workers'])
+        cluster_data['node_type_id'].append(cluster['node_type_id'])
+        cluster_data['state'].append(cluster['state'])
+
+    # Create a dataframe from the cluster_data dictionary
+    cluster_df = pd.DataFrame(cluster_data)
+
+    return cluster_df
+
+You can now call the get_cluster_list() function to retrieve the cluster list as a dataframe. Make sure you have the databricks_api package installed from PyPI before running this code.
+
+Certainly! Here's a Python function that calls the databricks_api from PyPI and retrieves a list of policies. It then creates a dataframe:
+
+import databricks_api
+import pandas as pd
+
+def get_policy_list():
+    # Create an instance of the Databricks API client
+    api = databricks_api.DatabricksAPI()
+
+    # Get the policy list using the list_policies method
+    policies = api.policy.list_policies(headers=None)
+
+    # Create a dataframe from the policies
+    policy_df = pd.DataFrame(policies['policies'])
+
+    return policy_df
+
+You can now call the get_policy_list() function to retrieve the list of policies as a dataframe. Make sure you have the databricks_api package installed from PyPI before running this code.
+
+Can you please create a python function which calls the databricks delta table which hold the cluster usage details for all users.
+Steps to followed here
+    1) Get the top 10 users who are using the most cluster usages 
+    2) convert to a pandas dataframe.
+    
+To query a Databricks Delta table that holds cluster usage details for all users and retrieve the top 10 users who are using the most cluster usage, you can use the pyspark library in Python. Here's an example of how you can accomplish this:
+
+from pyspark.sql import SparkSession
+import pandas as pd
+
+def get_top_users_cluster_usage():
+    # Create a SparkSession
+    spark = SparkSession.builder \
+        .appName("ClusterUsageAnalysis") \
+        .getOrCreate()
+
+    # Read the Delta table into a Spark DataFrame
+    df = spark.read.format("delta").load("/path/to/delta_table")
+
+    # Group by user and calculate total cluster usage
+    usage_df = df.groupBy("user").sum("cluster_usage").withColumnRenamed("sum(cluster_usage)", "total_usage")
+
+    # Order by total cluster usage in descending order
+    sorted_df = usage_df.orderBy("total_usage", ascending=False)
+
+    # Get the top 10 users
+    top_users = sorted_df.limit(10).toPandas()
+
+    return top_users
+
+Make sure to replace "/path/to/delta_table" with the actual path to your Delta table that holds cluster usage details. The table should contain at least two columns: "user" and "cluster_usage".
+
+To use this function, you need to have Apache Spark and PySpark installed. You can then call the get_top_users_cluster_usage() function, and it will return the top 10 users with the highest cluster usage as a pandas DataFrame.
+
+Note that the code assumes you have a running Spark cluster and the necessary permissions to access the Delta table.
