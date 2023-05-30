@@ -560,3 +560,77 @@ Make sure to replace "/path/to/delta_table" with the actual path to your Delta t
 To use this function, you need to have Apache Spark and PySpark installed. You can then call the get_top_users_cluster_usage() function, and it will return the top 10 users with the highest cluster usage as a pandas DataFrame.
 
 Note that the code assumes you have a running Spark cluster and the necessary permissions to access the Delta table.
+
+Create a python function to edit databricks cluster policy with REST API
+
+1) The function should take cluster_id,policy_name,config_path as JSON file as input
+2) return the function with appropriate message
+
+Certainly! Here's an updated Python function that uses the Databricks REST API to edit a cluster policy based on the provided inputs. It includes handling SSL certificate verification errors:
+
+import requests
+import json
+
+def edit_cluster_policy(cluster_id, policy_name, config_path, token):
+    # Read the policy configuration from the JSON file
+    with open(config_path, 'r') as f:
+        policy_config = json.load(f)
+
+    # Construct the API endpoint URL
+    url = f"https://<databricks-instance>/api/2.0/clusters/policies/edit"
+
+    # Set the request headers with the authentication token
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+
+    # Create the request payload with the cluster ID, policy name, and configuration
+    payload = {
+        "cluster_id": cluster_id,
+        "policy_name": policy_name,
+        "policy_config": policy_config
+    }
+
+    # Disable SSL certificate verification
+    verify_ssl = False
+
+    # Send the POST request to edit the cluster policy
+    response = requests.post(url, headers=headers, data=json.dumps(payload), verify=verify_ssl)
+
+    # Check the response status code
+    if response.status_code == 200:
+        # Successful update
+        return "Cluster policy updated successfully."
+    else:
+        # Error occurred
+        return f"Failed to edit cluster policy. Error: {response.content.decode('utf-8')}"
+        
+        
+I have a table called hive_metastore.default_usagedetails in databricks, which holds the information about the databricks cluster usage for users
+Can you please give me a query who are the top 10 cluser dbu usage  
+
+I have a table called hive_metastore.default_usagedetails in databricks, which holds the information about the databricks cluster usage for users
+Can you please give me top 10 clusters users who are consuming more dbu's ?
+
+Certainly! To retrieve the top 10 cluster users who are consuming the most DBUs (Databricks Units) from the hive_metastore.default_usagedetails table in Databricks, you can use the following query:
+
+SELECT cluster_id, user, SUM(dbu_usage) AS total_dbu_usage
+FROM hive_metastore.default_usagedetails
+GROUP BY cluster_id, user
+ORDER BY total_dbu_usage DESC
+LIMIT 10;
+
+This query calculates the total DBU usage for each combination of cluster_id and user by summing up the dbu_usage column. 
+It then orders the results in descending order of total DBU usage. 
+The LIMIT 10 clause ensures that only the top 10 clusters/users with the highest DBU usage are returned in the result set.
+
+Please note that you may need to adjust the table name and column names in the query based on your specific schema and column naming conventions in the hive_metastore.default_usagedetails table.
+
+https://www.databricks.com/spark/getting-started-with-apache-spark/dataframes#view-the-dataframe
+
+https://www.google.com/search?q=databricks+display+dataframe+as+table&rlz=1C1GCEA_enIN969IN969&sxsrf=APwXEdejeDUZ429PmppI4_Ci9dRb0TBJlA%3A1685130138253&ei=mgtxZOuHD9P4-QblqJuIDg&oq=how+to+beautify+databricks+dataframe+in+python&gs_lcp=Cgxnd3Mtd2l6LXNlcnAQARgBMgoIABBHENYEELADMgoIABBHENYEELADMgoIABBHENYEELADMgoIABBHENYEELADMgoIABBHENYEELADMgoIABBHENYEELADMgoIABBHENYEELADMgoIABBHENYEELADSgQIQRgAUABYAGCpO2gEcAF4AIABAIgBAJIBAJgBAMABAcgBCA&sclient=gws-wiz-serp
+
+https://stackoverflow.com/questions/39067505/pyspark-display-a-spark-data-frame-in-a-table-format
+
+https://stackoverflow.com/questions/46125604/databricks-display-function-equivalent-or-alternative-to-jupyter
