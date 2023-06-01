@@ -634,3 +634,144 @@ https://www.google.com/search?q=databricks+display+dataframe+as+table&rlz=1C1GCE
 https://stackoverflow.com/questions/39067505/pyspark-display-a-spark-data-frame-in-a-table-format
 
 https://stackoverflow.com/questions/46125604/databricks-display-function-equivalent-or-alternative-to-jupyter
+
+
+
+Certainly! Here's an example of a function written in Python that takes a Databricks policy ID as input and attaches it to a cluster:
+
+Can you write a function where it will take databricks policy id as input and attach to a cluster 
+
+import requests
+import json
+
+def attach_policy_to_cluster(policy_id, cluster_id, api_token):
+    # Databricks API endpoint for attaching a policy to a cluster
+    url = f"https://<databricks-instance>/api/2.0/policies/clusters/attach"
+    
+    # Request headers including the API token
+    headers = {
+        "Authorization": f"Bearer {api_token}",
+        "Content-Type": "application/json"
+    }
+    
+    # Request payload
+    payload = {
+        "policy_id": policy_id,
+        "cluster_id": cluster_id
+    }
+    
+    try:
+        # Send a POST request to attach the policy to the cluster
+        response = requests.post(url, headers=headers, data=json.dumps(payload))
+        response.raise_for_status()  # Raise an exception for any HTTP error status
+        
+        # Check the response for success
+        response_data = response.json()
+        if response_data.get("status", "") == "OK":
+            print("Policy attached successfully.")
+        else:
+            print("Failed to attach policy.")
+    
+    except requests.exceptions.RequestException as e:
+        print("Error occurred while attaching policy:", e)
+
+# Example usage
+policy_id = "your_policy_id"
+cluster_id = "your_cluster_id"
+api_token = "your_api_token"
+
+attach_policy_to_cluster(policy_id, cluster_id, api_token)
+
+
+Make sure to replace <databricks-instance>, your_policy_id, your_cluster_id, and your_api_token with the appropriate values for your Databricks environment.
+
+Please note that this is a basic implementation and assumes you have the necessary permissions and configurations in your Databricks instance to attach policies to clusters using the Databricks API. Additionally, you may need to install the requests library if it's not already available in your Python environment.
+
+
+Can you write a function where it will take databricks policy id as input and attach to a cluster and please verify it is attached or note
+
+Certainly! Here's an updated version of the function that not only attaches the policy to a cluster but also verifies if the policy is successfully attached:
+
+import requests
+import json
+
+def attach_policy_to_cluster(policy_id, cluster_id, api_token):
+    # Databricks API endpoint for attaching a policy to a cluster
+    url = f"https://<databricks-instance>/api/2.0/policies/clusters/attach"
+    
+    # Request headers including the API token
+    headers = {
+        "Authorization": f"Bearer {api_token}",
+        "Content-Type": "application/json"
+    }
+    
+    # Request payload
+    payload = {
+        "policy_id": policy_id,
+        "cluster_id": cluster_id
+    }
+    
+    try:
+        # Send a POST request to attach the policy to the cluster
+        response = requests.post(url, headers=headers, data=json.dumps(payload))
+        response.raise_for_status()  # Raise an exception for any HTTP error status
+        
+        # Check the response for success
+        response_data = response.json()
+        if response_data.get("status", "") == "OK":
+            print("Policy attached successfully.")
+            
+            # Verify if the policy is attached
+            if is_policy_attached(policy_id, cluster_id, api_token):
+                print("Policy is attached to the cluster.")
+            else:
+                print("Policy is not attached to the cluster.")
+        else:
+            print("Failed to attach policy.")
+    
+    except requests.exceptions.RequestException as e:
+        print("Error occurred while attaching policy:", e)
+
+def is_policy_attached(policy_id, cluster_id, api_token):
+    # Databricks API endpoint for getting attached policies on a cluster
+    url = f"https://<databricks-instance>/api/2.0/policies/clusters/list"
+    
+    # Request headers including the API token
+    headers = {
+        "Authorization": f"Bearer {api_token}",
+        "Content-Type": "application/json"
+    }
+    
+    try:
+        # Send a GET request to retrieve attached policies on the cluster
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()  # Raise an exception for any HTTP error status
+        
+        # Check the response for success and policy attachment
+        response_data = response.json()
+        if response_data.get("status", "") == "OK":
+            attached_policies = response_data.get("attached", [])
+            for policy in attached_policies:
+                if policy.get("policy_id") == policy_id and policy.get("cluster_id") == cluster_id:
+                    return True
+        return False
+    
+    except requests.exceptions.RequestException as e:
+        print("Error occurred while retrieving attached policies:", e)
+        return False
+
+# Example usage
+policy_id = "your_policy_id"
+cluster_id = "your_cluster_id"
+api_token = "your_api_token"
+
+attach_policy_to_cluster(policy_id, cluster_id, api_token)
+
+
+
+Make sure to replace <databricks-instance>, your_policy_id, your_cluster_id, and your_api_token with the appropriate values for your Databricks environment.
+
+The function is_policy_attached checks if the specified policy ID is attached to the specified cluster ID by making a separate API call to retrieve the attached policies on the cluster. It then iterates through the attached policies to find a match. If a match is found, it returns True, indicating that the policy is attached. Otherwise, it returns False.
+
+Note that the function is_policy_attached assumes that you have the necessary permissions and configurations in your Databricks instance to retrieve attached policies using the Databricks API.
+
